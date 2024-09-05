@@ -1,0 +1,143 @@
+<!--Code by kreedy-->
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>Roulette simulator</title>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+	<link href="https://fonts.googleapis.com/css?family=Lato:700" rel="stylesheet">
+	<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="css/bootstrap-theme.min.css">
+	<link rel="stylesheet" type="text/css" href="fonts/fontello/css/fontello.css">
+	<link rel="stylesheet" type="text/css" href="css/mine.css">
+</head>
+<body onload="pageOnload()">
+<div class="container" style="width: 90%;">
+<h1 style="font-size: 60px; text-align: center;">Roulette <span style="color: #65b5dc">Simulator</span></h1>
+<div style="margin-top: 10px;"></div>
+<div id="alerts"></div>
+<div style="margin-top: 20px;"></div>
+<div id="roulette-container">
+	<div id="history">
+		<span id="history-numbers"></span>
+	</div>
+	<div id="progress-bar-container">
+		<div style="width: 100%; position: absolute;">
+			<div id="progress" style="width: 100%"> </div>
+		</div>
+		<span id="progress-bar-text">Loading...</span>	
+	</div>
+	<div id="case">
+		<div id="info-container"></div>
+		<div id="pointer"></div>
+	</div>
+	<div style="margin-top: 10px;"></div>
+	<div class="well" style="text-align: center; line-height: auto;">
+		<div class="border1">Balance: &#160;&#160;<span id="balance">0</span>&#160;<i class="icon-lifebuoy"></i></div>
+		&#160;&#160;
+		<input id="bet" type="number" min="0" max="7000000" class="form-control" style="width: 150px; display: inline-block;" placeholder="Bet amount"></input>
+		&#160;&#160;
+		<button type="button" class="btn btn-md btn-lblue" id="clearBetAmount">Clear</button>
+		<button type="button" class="btn btn-md btn-lblue" onclick="increseBet(10)">+10</button>
+		<button type="button" class="btn btn-md btn-lblue" onclick="increseBet(100)">+100</button>
+		<button type="button" class="btn btn-md btn-lblue" onclick="increseBet(1000)">+1000</button>
+		<button type="button" class="btn btn-md btn-lblue" onclick="increseBet(10000)">+10000</button>
+		<button type="button" class="btn btn-md btn-lblue" onclick="halfBet()">1/2</button>
+		<button type="button" class="btn btn-md btn-lblue" onclick="increseBet(betAmount)">2X</button>
+		<button type="button" class="btn btn-md btn-lblue" onclick="increseBet(balance-betAmount)">MAX</button>
+		&#160;&#160;&#160;<button type="button" class="btn btn-md btn-warning" onclick="collectCoins()" >Collect free coins</button>
+	</div>
+	<div class="row">
+		<div class="col-xs-4">
+			<button type="button" class="btn btn-lg btn-red btn-bet" id="betOnRed" onclick="bet(1)">1 to 7, Win 2X</button>
+			<span class="coins" id="redCoins"></span>
+		</div>
+		<div class="col-xs-4">
+			<button type="button" class="btn btn-lg btn-green btn-bet" id="betOnGreen" onclick="bet(2)">0, Win 14X</button>
+			<span class="coins" id="greenCoins"></span>
+		</div>
+		<div class="col-xs-4">
+			<button type="button" class="btn btn-lg btn-black btn-bet" id="betOnBlack" onclick="bet(3)">8 to 14, Win 2X</button>
+			<span class="coins" id="blackCoins"></span>
+		</div>
+	</div>
+</div>
+<div id="settings-container">
+	<button class="btn btn-primary btn-lg btn-settings" onclick="toggleSettings()"><span id="settingsBtn">Hide settings</span><span class="caret"></span></button>
+	<div id="settings">
+		<form id="generatorSettings" style="margin-top: 20px;">
+			<label style="font-size: 20px; text-align: center; width: 100%">Generator settings</label>
+			<div class="input-group">
+				<span class="input-group-addon" style="padding-right: 13px;">Seed</span>
+				<input type="text" class="form-control" id="g_secret">
+				<span class="input-group-btn">
+					<button class="btn btn-primary" type="button" id="s_secret">Set</button>
+					<button class="btn btn-primary" type="button" onclick='resetVar("secret")'><i class="icon-arrows-cw"></i></button>
+				</span>
+			</div><br />
+			<div class="input-group">
+				<span class="input-group-addon">Public</span>
+				<input type="text" class="form-control" id="g_public">
+				<span class="input-group-btn">
+					<button class="btn btn-primary" type="button" id="s_public">Set</button>
+					<button class="btn btn-primary" type="button" onclick='resetVar("public")'><i class="icon-arrows-cw"></i></button>
+				</span>
+			</div><br />
+			<div class="input-group">
+				<span class="input-group-addon">Round</span>
+				<input type="text" class="form-control" id="g_round" >
+				<span class="input-group-btn">
+					<button class="btn btn-primary" type="button" id="s_round">Set</button>
+					<button class="btn btn-primary" type="button" onclick='resetVar("round")'><i class="icon-arrows-cw"></i></button>
+				</span>
+			</div><br />
+			<div class="[ form-group ]">
+				<input type="checkbox" name="autoIncrement" id="fancy-checkbox-primary" autocomplete="on" />
+				<div class="[ btn-group ]">
+					<label for="fancy-checkbox-primary" class="[ btn btn-primary ]">
+						<span class="[ glyphicon glyphicon-ok ]"></span>
+						<span> </span>
+					</label>
+					<label for="fancy-checkbox-primary" class="[ btn btn-default active ]">Auto increment round</label>
+				</div>
+			</div>
+		</form>
+		<form id="rouletteSettings" style="margin-top: 20px;">
+			<label style="font-size: 20px; text-align: center; width: 100%">Roulette settings</label>
+			<div class="input-group">
+				<span class="input-group-addon">Countdown (ms)</span>
+				<input type="number" class="form-control" id="countDownValue" value="10000" min="0" max="60000" step="50">
+				<span class="input-group-btn">
+					<button class="btn btn-primary" type="button" id="countDownSetBtn">Set</button>
+					<button class="btn btn-primary" type="button" onclick='resetVar("countdown")'><i class="icon-arrows-cw"></i></button>
+				</span>
+			</div><br />
+			<div class="input-group">
+				<span class="input-group-addon">Roulette speed (1-50)</span>
+				<input type="number" class="form-control" id="speed" value="10" min="1" max="50" step="0.1">
+			</div><br />
+			<div class="form-group">
+				<input type="checkbox" name="freerewardLimit" id="fancy-checkbox-default" autocomplete="on" />
+				<div class="[ btn-group ]">
+					<label for="fancy-checkbox-default" class="[ btn btn-primary ]">
+						<span class="[ glyphicon glyphicon-ok ]"></span>
+						<span> </span>
+					</label>
+					<label for="fancy-checkbox-default" class="[ btn btn-default active ]" style="width: 165px">Free coins limit</label>
+				</div>
+			</div>
+			<button type="button" class="btn btn-lg btn-primary" onclick="manualRoll = true" style="font-size: 16px; width: 100%">Start round manually</button>
+		</form>
+	</div>
+</div>
+</div>
+<div class="footer">
+	<span class="copy">Coded by kreedy &copy; 2017 - All rights reserved.</span>
+</div>
+	<script src="js/jquery-3.1.1.min.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+	<script src="js/countUp.js"></script>
+	<script src="js/sha256.js"> </script>
+	<script src="js/roulette.js"> </script>
+</body>
+</html>
